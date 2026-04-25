@@ -1,0 +1,50 @@
+name: Deploy Codescripting
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Build public frontend
+        working-directory: frontend
+        run: |
+          npm ci
+          npm run build
+
+      - name: Build private dashboard
+        working-directory: home-dashboard
+        run: |
+          npm ci
+          npm run build
+
+      - name: Connect to Tailscale
+        uses: tailscale/github-action@v3
+        with:
+          authkey: ${{ secrets.TS_AUTHKEY }}
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SERVER_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Deploy public site
+        run: |
+          rsync -az --delete -e "ssh -i ~/.ssh/deploy_key" frontend/dist/ ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/data/www/public/
+
+      - name: Deploy private dashboard
+        run: |
+          rsync -az --delete -e "ssh -i ~/.ssh/deploy_key" home-dashboard/dist/ ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/data/www/home/

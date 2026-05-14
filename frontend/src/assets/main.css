@@ -1,0 +1,35 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  *, *::before, *::after { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    @apply bg-cream text-ink font-sans overflow-x-hidden;
+  }
+}
+
+@layer components {
+  .section-label {
+    @apply font-mono text-xs text-blue tracking-widest uppercase text-center mb-2;
+    letter-spacing: 0.18em;
+  }
+  .section-heading {
+    @apply font-serif text-ink text-center mb-14;
+    font-size: clamp(28px, 4vw, 46px);
+  }
+  .btn-primary {
+    @apply inline-flex items-center justify-center rounded-full bg-blue text-white
+           font-sans font-medium uppercase tracking-widest no-underline
+           transition-all duration-200 hover:bg-ink;
+    padding: 14px 64px;
+    font-size: 13px;
+    letter-spacing: 0.14em;
+    box-shadow: 0 12px 40px rgba(59,123,212,0.28);
+  }
+  .btn-primary:hover {
+    box-shadow: 0 12px 40px rgba(26,35,64,0.22);
+    transform: translateY(-2px);
+  }
+}
